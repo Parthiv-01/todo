@@ -8,13 +8,18 @@ import { Todo } from '../lib/types';
 import { getTodos, createTodo } from '../lib/api';
 import TodoItem from './TodoItem';
 
-export default function TodoList({ initialTodos }: { initialTodos: { todos: Todo[], totalPages: number } }) {
-  const [todos, setTodos] = useState<Todo[]>(initialTodos.todos);
+export default function TodoList({ 
+  searchParamsPage 
+}: { 
+  searchParamsPage: string | string[] | undefined 
+}) {
+  const router = useRouter();
+  const [todos, setTodos] = useState<Todo[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(initialTodos.totalPages);
+  const [totalPages, setTotalPages] = useState(1);
+  const [isLoading, setIsLoading] = useState(true);
   const [showSearchInput, setShowSearchInput] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const router = useRouter();
   
   // Check if we're on mobile using window width
   const [isMobile, setIsMobile] = useState(false);
@@ -33,6 +38,31 @@ export default function TodoList({ initialTodos }: { initialTodos: { todos: Todo
     // Cleanup
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+  
+  // Parse page from search params
+  useEffect(() => {
+    const pageStr = Array.isArray(searchParamsPage) 
+      ? searchParamsPage[0] 
+      : searchParamsPage;
+      
+    const page = pageStr ? parseInt(pageStr, 10) : 1;
+    setCurrentPage(page);
+    
+    const fetchTodos = async () => {
+      setIsLoading(true);
+      try {
+        const result = await getTodos(page);
+        setTodos(result.todos);
+        setTotalPages(result.totalPages);
+      } catch (error) {
+        console.error('Error fetching todos:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchTodos();
+  }, [searchParamsPage]);
   
   const refreshTodos = async () => {
     const fetchedTodos = await getTodos(currentPage);
