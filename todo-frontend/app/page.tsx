@@ -3,23 +3,17 @@ import TodoList from './components/TodoList';
 import TodoEditor from './components/TodoEditor';
 import { getTodos } from './lib/api';
 
-export default async function Home({
-  searchParams,
-}: {
-  searchParams?: Record<string, string | string[] | undefined>;
+export default async function Home({ 
+  searchParams 
+}: { 
+  searchParams: { [key: string]: string | string[] | undefined } 
 }) {
-  // Access page safely
-  let page = 1;
-  if (searchParams && 'page' in searchParams) {
-    const pageValue = searchParams.page;
-    if (typeof pageValue === 'string') {
-      const parsed = parseInt(pageValue, 10);
-      if (!isNaN(parsed)) {
-        page = parsed;
-      }
-    }
-  }
-  
+  // Safe way to get the page number
+  const pageStr = Array.isArray(searchParams.page) 
+    ? searchParams.page[0] 
+    : searchParams.page;
+    
+  const page = pageStr ? parseInt(pageStr, 10) : 1;
   const todos = await getTodos(page);
   
   return (
