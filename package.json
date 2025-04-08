@@ -1,0 +1,12 @@
+{
+  "name": "todo",
+  "version": "1.0.0",
+  "description": "todo website",
+  "main": "index.js",
+  "scripts": {
+    "build": "npm install --prefix todo-backend && npm install --prefix todo-frontend && npm run build --prefix todo-frontend",
+    "start": "npm run start --prefix todo-backend"
+  },
+  "author": "",
+  "license": "ISC"
+}
